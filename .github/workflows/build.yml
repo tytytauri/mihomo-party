@@ -240,104 +240,104 @@ jobs:
           body_path: changelog.md
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  aur-release-updater:
-    strategy:
-      fail-fast: false
-      matrix:
-        pkgname:
-          - mihomo-party-electron-bin
-          - mihomo-party-electron
-          - mihomo-party-bin
-          - mihomo-party
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: linux
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Update Version
-        run: |
-          sed -i "s/pkgver=.*/pkgver=$(echo ${{ github.ref }} | tr -d 'refs/tags/v')/" aur/${{ matrix.pkgname }}/PKGBUILD
-      - name: Update Checksums
-        if: matrix.pkgname == 'mihomo-party' || matrix.pkgname == 'mihomo-party-electron'
-        run: |
-          wget https://github.com/mihomo-party-org/mihomo-party/archive/refs/tags/$(echo ${{ github.ref }} | tr -d 'refs/tags/').tar.gz -O release.tar.gz
-          sed -i "s/sha256sums=.*/sha256sums=(\"$(sha256sum ./release.tar.gz | awk '{print $1}')\"/" aur/mihomo-party/PKGBUILD
-          sed -i "s/sha256sums=.*/sha256sums=(\"$(sha256sum ./release.tar.gz | awk '{print $1}')\"/" aur/mihomo-party-electron/PKGBUILD
-      - name: Update Checksums
-        if: matrix.pkgname == 'mihomo-party-bin' || matrix.pkgname == 'mihomo-party-electron-bin'
-        run: |
-          wget https://github.com/mihomo-party-org/mihomo-party/releases/download/$(echo ${{ github.ref }} | tr -d 'refs/tags/')/mihomo-party-linux-$(echo ${{ github.ref }} | tr -d 'refs/tags/v')-amd64.deb -O amd64.deb
-          wget https://github.com/mihomo-party-org/mihomo-party/releases/download/$(echo ${{ github.ref }} | tr -d 'refs/tags/')/mihomo-party-linux-$(echo ${{ github.ref }} | tr -d 'refs/tags/v')-arm64.deb -O arm64.deb
-          sed -i "s/sha256sums_x86_64=.*/sha256sums_x86_64=(\"$(sha256sum ./amd64.deb | awk '{print $1}')\")/" aur/mihomo-party-bin/PKGBUILD
-          sed -i "s/sha256sums_aarch64=.*/sha256sums_aarch64=(\"$(sha256sum ./arm64.deb | awk '{print $1}')\")/" aur/mihomo-party-bin/PKGBUILD
-          sed -i "s/sha256sums_x86_64=.*/sha256sums_x86_64=(\"$(sha256sum ./amd64.deb | awk '{print $1}')\")/" aur/mihomo-party-electron-bin/PKGBUILD
-          sed -i "s/sha256sums_aarch64=.*/sha256sums_aarch64=(\"$(sha256sum ./arm64.deb | awk '{print $1}')\")/" aur/mihomo-party-electron-bin/PKGBUILD
-      - name: Publish AUR package
-        uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
-        with:
-          pkgname: ${{ matrix.pkgname }}
-          pkgbuild: aur/${{ matrix.pkgname }}/PKGBUILD
-          commit_username: pompurin404
-          commit_email: pompurin404@mihomo.party
-          ssh_private_key: ${{ secrets.PRIVATE_KEY }}
-          commit_message: Update AUR package
-          ssh_keyscan_types: rsa,ed25519
-          allow_empty_commits: false
+  # aur-release-updater:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       pkgname:
+  #         - mihomo-party-electron-bin
+  #         - mihomo-party-electron
+  #         - mihomo-party-bin
+  #         - mihomo-party
+  #   if: startsWith(github.ref, 'refs/tags/v')
+  #   needs: linux
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #     - name: Update Version
+  #       run: |
+  #         sed -i "s/pkgver=.*/pkgver=$(echo ${{ github.ref }} | tr -d 'refs/tags/v')/" aur/${{ matrix.pkgname }}/PKGBUILD
+  #     - name: Update Checksums
+  #       if: matrix.pkgname == 'mihomo-party' || matrix.pkgname == 'mihomo-party-electron'
+  #       run: |
+  #         wget https://github.com/mihomo-party-org/mihomo-party/archive/refs/tags/$(echo ${{ github.ref }} | tr -d 'refs/tags/').tar.gz -O release.tar.gz
+  #         sed -i "s/sha256sums=.*/sha256sums=(\"$(sha256sum ./release.tar.gz | awk '{print $1}')\"/" aur/mihomo-party/PKGBUILD
+  #         sed -i "s/sha256sums=.*/sha256sums=(\"$(sha256sum ./release.tar.gz | awk '{print $1}')\"/" aur/mihomo-party-electron/PKGBUILD
+  #     - name: Update Checksums
+  #       if: matrix.pkgname == 'mihomo-party-bin' || matrix.pkgname == 'mihomo-party-electron-bin'
+  #       run: |
+  #         wget https://github.com/mihomo-party-org/mihomo-party/releases/download/$(echo ${{ github.ref }} | tr -d 'refs/tags/')/mihomo-party-linux-$(echo ${{ github.ref }} | tr -d 'refs/tags/v')-amd64.deb -O amd64.deb
+  #         wget https://github.com/mihomo-party-org/mihomo-party/releases/download/$(echo ${{ github.ref }} | tr -d 'refs/tags/')/mihomo-party-linux-$(echo ${{ github.ref }} | tr -d 'refs/tags/v')-arm64.deb -O arm64.deb
+  #         sed -i "s/sha256sums_x86_64=.*/sha256sums_x86_64=(\"$(sha256sum ./amd64.deb | awk '{print $1}')\")/" aur/mihomo-party-bin/PKGBUILD
+  #         sed -i "s/sha256sums_aarch64=.*/sha256sums_aarch64=(\"$(sha256sum ./arm64.deb | awk '{print $1}')\")/" aur/mihomo-party-bin/PKGBUILD
+  #         sed -i "s/sha256sums_x86_64=.*/sha256sums_x86_64=(\"$(sha256sum ./amd64.deb | awk '{print $1}')\")/" aur/mihomo-party-electron-bin/PKGBUILD
+  #         sed -i "s/sha256sums_aarch64=.*/sha256sums_aarch64=(\"$(sha256sum ./arm64.deb | awk '{print $1}')\")/" aur/mihomo-party-electron-bin/PKGBUILD
+  #     - name: Publish AUR package
+  #       uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
+  #       with:
+  #         pkgname: ${{ matrix.pkgname }}
+  #         pkgbuild: aur/${{ matrix.pkgname }}/PKGBUILD
+  #         commit_username: pompurin404
+  #         commit_email: pompurin404@mihomo.party
+  #         ssh_private_key: ${{ secrets.PRIVATE_KEY }}
+  #         commit_message: Update AUR package
+  #         ssh_keyscan_types: rsa,ed25519
+  #         allow_empty_commits: false
 
-  aur-git-updater:
-    if: startsWith(github.ref, 'refs/heads/')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: update version
-        run: |
-          sed -i "s/pkgver=.*/pkgver=$(git describe --long 2>/dev/null | sed 's/\([^-]*-g\)/r\1/;s/-/./g' | tr -d 'v')/" aur/mihomo-party-git/PKGBUILD
-      - name: Publish AUR package
-        uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
-        with:
-          pkgname: mihomo-party-git
-          pkgbuild: aur/mihomo-party-git/PKGBUILD
-          commit_username: pompurin404
-          commit_email: pompurin404@mihomo.party
-          ssh_private_key: ${{ secrets.PRIVATE_KEY }}
-          commit_message: Update AUR package
-          ssh_keyscan_types: rsa,ed25519
-          allow_empty_commits: false
+  # aur-git-updater:
+  #   if: startsWith(github.ref, 'refs/heads/')
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+  #     - name: update version
+  #       run: |
+  #         sed -i "s/pkgver=.*/pkgver=$(git describe --long 2>/dev/null | sed 's/\([^-]*-g\)/r\1/;s/-/./g' | tr -d 'v')/" aur/mihomo-party-git/PKGBUILD
+  #     - name: Publish AUR package
+  #       uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
+  #       with:
+  #         pkgname: mihomo-party-git
+  #         pkgbuild: aur/mihomo-party-git/PKGBUILD
+  #         commit_username: pompurin404
+  #         commit_email: pompurin404@mihomo.party
+  #         ssh_private_key: ${{ secrets.PRIVATE_KEY }}
+  #         commit_message: Update AUR package
+  #         ssh_keyscan_types: rsa,ed25519
+  #         allow_empty_commits: false
 
-  winget:
-    if: startsWith(github.ref, 'refs/tags/v')
-    name: Update WinGet Package
-    needs: windows
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get Tag Name
-        run: echo "VERSION=$(echo ${{ github.ref }} | tr -d 'refs/tags/v')" >> $GITHUB_ENV
-      - name: Submit to Winget
-        uses: vedantmgoyal9/winget-releaser@main
-        with:
-          identifier: Mihomo-Party.Mihomo-Party
-          version: ${{env.VERSION}}
-          release-tag: v${{env.VERSION}}
-          installers-regex: 'mihomo-party-windows-.*setup\.exe$'
-          token: ${{ secrets.POMPURIN404_TOKEN }}
+  # winget:
+  #   if: startsWith(github.ref, 'refs/tags/v')
+  #   name: Update WinGet Package
+  #   needs: windows
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Get Tag Name
+  #       run: echo "VERSION=$(echo ${{ github.ref }} | tr -d 'refs/tags/v')" >> $GITHUB_ENV
+  #     - name: Submit to Winget
+  #       uses: vedantmgoyal9/winget-releaser@main
+  #       with:
+  #         identifier: Mihomo-Party.Mihomo-Party
+  #         version: ${{env.VERSION}}
+  #         release-tag: v${{env.VERSION}}
+  #         installers-regex: 'mihomo-party-windows-.*setup\.exe$'
+  #         token: ${{ secrets.POMPURIN404_TOKEN }}
 
-  homebrew:
-    if: startsWith(github.ref, 'refs/tags/v')
-    name: Update Homebrew cask
-    needs: macos
-    runs-on: macos-latest
-    steps:
-      - name: Set up Git
-        run: |
-          git config --global user.email pompurin404@mihomo.party
-          git config --global user.name pompurin404
-      - name: Update Homebrew cask
-        env:
-          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.POMPURIN404_TOKEN }}
-        run: |
-          brew tap mihomo-party-org/mihomo-party
-          brew update
-          brew bump-cask-pr mihomo-party --version $(echo ${{ github.ref }} | tr -d 'refs/tags/v') --no-browse
+  # homebrew:
+  #   if: startsWith(github.ref, 'refs/tags/v')
+  #   name: Update Homebrew cask
+  #   needs: macos
+  #   runs-on: macos-latest
+  #   steps:
+  #     - name: Set up Git
+  #       run: |
+  #         git config --global user.email pompurin404@mihomo.party
+  #         git config --global user.name pompurin404
+  #     - name: Update Homebrew cask
+  #       env:
+  #         HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.POMPURIN404_TOKEN }}
+  #       run: |
+  #         brew tap mihomo-party-org/mihomo-party
+  #         brew update
+  #         brew bump-cask-pr mihomo-party --version $(echo ${{ github.ref }} | tr -d 'refs/tags/v') --no-browse
